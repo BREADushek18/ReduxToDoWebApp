@@ -83,7 +83,7 @@ const DraggableTaskList = ({ tasks, deleteTask, editTask, gifs }) => {
                         <strong className="task-title">{truncateText(task.title)}</strong><br />
                         <span className="task-body">{truncateText(task.description)}</span>
                     </div>
-                    <button onClick={() => deleteTask(index)}>×</button>
+                    <button className="delete-button" onClick={() => deleteTask(index)}>×</button>
                     {activeTaskIndex === index && (
                         <SpecButtons 
                             onEdit={() => handleEditTask(index)} 
