@@ -1,22 +1,32 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { moveTask } from '../store/taskSlice';
+import { moveTask, editTask, deleteTask } from '../store/taskSlice';
 import SpecButtons from './SpecButtons';
 import EditModal from './EditModal';
 import ShareModal from './ShareModal';
 import InfoModal from './InfoModal';
+import DeleteTaskModal from './DeleteTaskModal'; 
 import '../styles/tasks.scss';
 import '../styles/buttons.scss';
 
-const DraggableTaskList = ({ tasks, deleteTask, editTask, gifs }) => {
+import cat1 from '../assets/images/cat1.gif';
+import cat2 from '../assets/images/cat2.gif';
+import cat3 from '../assets/images/cat3.gif';
+import cat4 from '../assets/images/cat4.gif';
+import cat5 from '../assets/images/cat5.gif';
+
+const DraggableTaskList = ({ tasks }) => {
     const dispatch = useDispatch();
     const [draggedIndex, setDraggedIndex] = useState(null);
     const [activeTaskIndex, setActiveTaskIndex] = useState(null);
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [isShareModalOpen, setShareModalOpen] = useState(false);
     const [isInfoModalOpen, setInfoModalOpen] = useState(false);
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false); 
     const [currentGif, setCurrentGif] = useState(null);
     const [currentTask, setCurrentTask] = useState({ index: null, title: '', description: '' });
+
+    const gifs = [cat1, cat2, cat3, cat4, cat5];
 
     const handleDragStart = (index) => {
         setDraggedIndex(index);
@@ -57,8 +67,18 @@ const DraggableTaskList = ({ tasks, deleteTask, editTask, gifs }) => {
 
     const handleSaveEdit = (newTitle, newDesc) => {
         if (newTitle.trim() === '') return;
-        editTask(currentTask.index, newTitle, newDesc);
+        dispatch(editTask({ index: currentTask.index, title: newTitle, description: newDesc }));
         setEditModalOpen(false);
+    };
+
+    const openDeleteModal = (index) => {
+        setCurrentTask({ index, title: tasks[index].title, description: tasks[index].description });
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteTask = () => {
+        dispatch(deleteTask(currentTask.index));
+        setDeleteModalOpen(false);
     };
 
     const truncateText = (text) => {
@@ -83,7 +103,7 @@ const DraggableTaskList = ({ tasks, deleteTask, editTask, gifs }) => {
                         <strong className="task-title">{truncateText(task.title)}</strong><br />
                         <span className="task-body">{truncateText(task.description)}</span>
                     </div>
-                    <button className="delete-button" onClick={() => deleteTask(index)}>×</button>
+                    <button className="delete-button" onClick={() => openDeleteModal(index)}>×</button>
                     {activeTaskIndex === index && (
                         <SpecButtons 
                             onEdit={() => handleEditTask(index)} 
@@ -110,6 +130,11 @@ const DraggableTaskList = ({ tasks, deleteTask, editTask, gifs }) => {
                 isOpen={isInfoModalOpen} 
                 onClose={() => setInfoModalOpen(false)} 
                 gif={currentGif}
+            />
+            <DeleteTaskModal 
+                isOpen={isDeleteModalOpen} 
+                onClose={() => setDeleteModalOpen(false)} 
+                onDelete={handleDeleteTask} 
             />
         </>
     );

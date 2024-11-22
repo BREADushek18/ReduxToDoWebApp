@@ -1,35 +1,36 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = {
-  tasks: [],
-};
+const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+storedTasks.forEach((task) => (task.isMenuOpened = false));
+const initialState = [...storedTasks];
 
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
   reducers: {
     addTask: (state, action) => {
-      state.tasks.push(action.payload);
-      localStorage.setItem('tasks', JSON.stringify(state.tasks));
+      state.push(action.payload);
+      localStorage.setItem('tasks', JSON.stringify(state));
     },
     deleteTask: (state, action) => {
-      state.tasks = state.tasks.filter((_, index) => index !== action.payload);
-      localStorage.setItem('tasks', JSON.stringify(state.tasks));
+      const newState = state.filter((_, index) => index !== action.payload);
+      localStorage.setItem('tasks', JSON.stringify(newState));
+      return newState;
     },
     editTask: (state, action) => {
       const { index, title, description } = action.payload;
-      state.tasks[index] = { title, description };
-      localStorage.setItem('tasks', JSON.stringify(state.tasks));
+      state[index] = { title, description };
+      localStorage.setItem('tasks', JSON.stringify(state));
     },
     loadTasks: (state) => {
-      const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-      state.tasks = savedTasks;
+      state = JSON.parse(localStorage.getItem("tasks")) || [];
+      state.forEach((task) => (task.isMenuOpened = false));
     },
     moveTask: (state, action) => {
       const { fromIndex, toIndex } = action.payload;
-      const [movedTask] = state.tasks.splice(fromIndex, 1);
-      state.tasks.splice(toIndex, 0, movedTask);
-      localStorage.setItem('tasks', JSON.stringify(state.tasks));
+      const [movedTask] = state.splice(fromIndex, 1);
+      state.splice(toIndex, 0, movedTask);
+      localStorage.setItem('tasks', JSON.stringify(state));
     },
   },
 });

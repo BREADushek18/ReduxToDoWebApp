@@ -1,8 +1,17 @@
 import React from 'react';
 import DraggableTaskList from './DraggableTaskList';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteTask } from '../store/taskSlice';
 import '../styles/tasks.scss';
 
-const TaskList = ({ tasks, deleteTask, editTask, gifs }) => {
+const TaskList = () => {
+    const dispatch = useDispatch();
+    const tasks = useSelector((state) => state.tasks);
+
+    const handleDeleteTask = (index) => {
+        dispatch(deleteTask(index));
+    };
+
     return (
         <div className="task-container">
             {tasks.length === 0 ? (
@@ -14,9 +23,7 @@ const TaskList = ({ tasks, deleteTask, editTask, gifs }) => {
             ) : (
                 <DraggableTaskList 
                     tasks={tasks} 
-                    deleteTask={deleteTask} 
-                    editTask={editTask} 
-                    gifs={gifs} 
+                    deleteTask={handleDeleteTask} 
                 />
             )}
         </div>
