@@ -1,6 +1,20 @@
 import React from 'react';
 
-const EditModal = ({ isOpen, onClose, onSave, fullTitle, fullDesc }) => {
+interface EditModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (title: string, description: string) => void;
+    fullTitle: string;
+    fullDesc: string;
+}
+
+const EditModal: React.FC<EditModalProps> = ({
+    isOpen,
+    onClose,
+    onSave,
+    fullTitle,
+    fullDesc
+}) => {
     const [newTitle, setNewTitle] = React.useState(fullTitle);
     const [newDesc, setNewDesc] = React.useState(fullDesc);
 

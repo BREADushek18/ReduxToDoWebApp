@@ -10,14 +10,14 @@ import './styles/modals.scss';
 import './styles/notes.scss';
 import './styles/tasks.scss';
 
-const App = () => {
+const App: React.FC = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch(loadTasks());
     }, [dispatch]);
 
-    const handleAddTask = (title, description) => {
+    const handleAddTask = (title: string, description: string) => {
         const newTask = { title, description };
         dispatch(addTask(newTask));
     };

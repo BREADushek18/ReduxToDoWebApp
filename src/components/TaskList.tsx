@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deleteTask } from '../store/taskSlice';
 import '../styles/tasks.scss';
 
-const TaskList = () => {
+const TaskList: React.FC = () => {
     const dispatch = useDispatch();
-    const tasks = useSelector((state) => state.tasks);
+    const tasks = useSelector((state: any) => state.tasks);
 
-    const handleDeleteTask = (index) => {
+    const handleDeleteTask = (index: number) => {
         dispatch(deleteTask(index));
     };
 

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import '../styles/layout.scss';
 
-const TaskInput = ({ addTask }) => {
+const TaskInput = ({
+    addTask
+}: any) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 

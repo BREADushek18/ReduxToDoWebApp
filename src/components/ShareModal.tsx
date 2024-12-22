@@ -1,6 +1,11 @@
 import React from 'react';
 
-const ShareModal = ({ isOpen, onClose, fullTitle, fullDescription }) => {
+const ShareModal = ({
+    isOpen,
+    onClose,
+    fullTitle,
+    fullDescription
+}: any) => {
     const handleCopy = () => {
         const textToCopy = `Задача: ${fullTitle}\nОписание задачи: ${fullDescription}\nЗадача была создана в самом лучшем To Do приложении разработчиком BREADushek <3`;
         navigator.clipboard.writeText(textToCopy)

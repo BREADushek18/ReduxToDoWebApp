@@ -1,6 +1,10 @@
 import React from 'react';
 
-const InfoModal = ({ isOpen, onClose, gif }) => {
+const InfoModal = ({
+    isOpen,
+    onClose,
+    gif
+}: any) => {
     return (
         <div className={`info-modal ${isOpen ? 'show' : ''}`} onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>

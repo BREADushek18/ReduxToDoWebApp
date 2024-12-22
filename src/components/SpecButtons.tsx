@@ -1,6 +1,10 @@
 import React from 'react';
 
-const SpecButtons = ({ onEdit, onShare, onInfo }) => {
+const SpecButtons = ({
+    onEdit,
+    onShare,
+    onInfo
+}: any) => {
     return (
         <div className="button-container">
             <button className="task-button" onClick={onShare}>

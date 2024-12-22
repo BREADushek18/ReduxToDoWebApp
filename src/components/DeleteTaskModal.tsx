@@ -1,7 +1,11 @@
 import React from 'react';
 import '../styles/modals.scss';
 
-const DeleteTaskModal = ({ isOpen, onClose, onDelete }) => {
+const DeleteTaskModal = ({
+    isOpen,
+    onClose,
+    onDelete
+}: any) => {
     return (
         <div className={`modal ${isOpen ? 'show' : ''}`}>
             <div className="modal-content">
