@@ -25,8 +25,10 @@ const tasksSlice = createSlice({
         },
         editTask: (state, action: PayloadAction<{ index: number; title: string; description: string }>) => {
             const { index, title, description } = action.payload;
-            state[index] = { title, description, isPinned: state[index].isPinned }; 
-            localStorage.setItem('tasks', JSON.stringify(state));
+            if (state[index]) {
+                state[index] = { title, description, isPinned: state[index].isPinned }; 
+                localStorage.setItem('tasks', JSON.stringify(state));
+            }
         },
         pinTask: (state, action: PayloadAction<number>) => {
             const index = action.payload;
@@ -45,18 +47,18 @@ const tasksSlice = createSlice({
             state.push(unPinnedTask); 
             localStorage.setItem('tasks', JSON.stringify(state));
         },
-        loadTasks: (state) => {
-            const tasks = JSON.parse(localStorage.getItem("tasks") || "[]") as Task[];
-            return tasks.map(task => ({ ...task, isMenuOpened: false }));
-        },
         moveTask: (state, action: PayloadAction<{ fromIndex: number; toIndex: number }>) => {
             const { fromIndex, toIndex } = action.payload;
             const [movedTask] = state.splice(fromIndex, 1);
             state.splice(toIndex, 0, movedTask);
             localStorage.setItem('tasks', JSON.stringify(state));
         },
+        loadTasks: (state) => {
+            const tasks = JSON.parse(localStorage.getItem("tasks") || "[]") as Task[];
+            return tasks.map(task => ({ ...task, isPinned: task.isPinned || false }));
+        },
     },
 });
 
-export const { addTask, deleteTask, editTask, loadTasks, moveTask, pinTask, unpinTask } = tasksSlice.actions;
+export const { addTask, deleteTask, editTask, moveTask, pinTask, unpinTask, loadTasks } = tasksSlice.actions;
 export default tasksSlice.reducer;

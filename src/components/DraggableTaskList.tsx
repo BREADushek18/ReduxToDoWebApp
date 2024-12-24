@@ -6,6 +6,7 @@ import EditModal from './EditModal';
 import ShareModal from './ShareModal';
 import InfoModal from './InfoModal';
 import DeleteTaskModal from './DeleteTaskModal'; 
+import NotificationModal from './NotificationModal';
 import '../styles/tasks.scss';
 import '../styles/buttons.scss';
 import cat1 from '../assets/images/cat1.gif';
@@ -34,6 +35,8 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks }) => {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false); 
     const [currentGif, setCurrentGif] = useState<string | null>(null);
     const [currentTask, setCurrentTask] = useState<Task | null>(null);
+    const [notification, setNotification] = useState<string>(''); 
+    const [taskToDeleteIndex, setTaskToDeleteIndex] = useState<number | null>(null);
 
     const gifs = [cat1, cat2, cat3, cat4, cat5];
 
@@ -42,6 +45,8 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks }) => {
     };
 
     const handleDragOver = (index: number) => {
+        if (tasks[index].isPinned) return;
+
         if (index !== draggedIndex) {
             dispatch(moveTask({ fromIndex: draggedIndex!, toIndex: index }));
             setDraggedIndex(index);
@@ -77,29 +82,44 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks }) => {
     const handleSaveEdit = (newTitle: string, newDesc: string) => {
         if (newTitle.trim() === '') return;
         if (currentTask) {
-            dispatch(editTask({ index: tasks.indexOf(currentTask), title: newTitle, description: newDesc }));
+            const index = tasks.indexOf(currentTask);
+            if (index !== -1) {
+                dispatch(editTask({ index, title: newTitle, description: newDesc }));
+            }
             setEditModalOpen(false);
         }
-    };
+    };    
 
     const openDeleteModal = (index: number) => {
+        setTaskToDeleteIndex(index); 
         setCurrentTask({ title: tasks[index].title, description: tasks[index].description });
         setDeleteModalOpen(true);
     };
 
     const handleDeleteTask = () => {
-        if (currentTask) {
-            dispatch(deleteTask(tasks.indexOf(currentTask))); 
+        if (taskToDeleteIndex !== null) {
+            dispatch(deleteTask(taskToDeleteIndex)); 
             setDeleteModalOpen(false);
+            setTaskToDeleteIndex(null); 
         }
     };
 
     const handlePinTask = (index: number) => {
+        const pinnedTasksCount = tasks.filter(task => task.isPinned).length;
         if (tasks[index].isPinned) {
             dispatch(unpinTask(index));
-        } else {
+        } else if (pinnedTasksCount < 3) {
             dispatch(pinTask(index));
+        } else {
+            showNotification();
         }
+    };
+
+    const showNotification = () => {
+        setNotification(`Вы не можете закрепить больше 3-х задач! Если вы хотите закрепить данную задачу, то открепите одну из существующих.`);
+        setTimeout(() => {
+            setNotification('');
+        }, 3000);
     };
 
     const truncateText = (text: string) => {
@@ -131,7 +151,7 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks }) => {
                             onShare={() => handleShareTask(index)} 
                             onInfo={handleInfoTask}
                             onPin={() => handlePinTask(index)} 
-                            isPinned={task.isPinned || false} // Передаем состояние задачи
+                            isPinned={task.isPinned || false} 
                         />
                     )}
                 </div>
@@ -159,6 +179,12 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks }) => {
                 onClose={() => setDeleteModalOpen(false)} 
                 onDelete={handleDeleteTask} 
             />
+            {notification && (
+                <NotificationModal 
+                    message={notification} 
+                    onClose={() => setNotification('')} 
+                />
+            )}
         </>
     );
 };
