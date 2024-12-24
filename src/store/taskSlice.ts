@@ -3,11 +3,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface Task {
     title: string;
     description: string;
-    isMenuOpened?: boolean;
+    isPinned?: boolean; 
 }
 
 const storedTasks: Task[] = JSON.parse(localStorage.getItem("tasks") || "[]");
-storedTasks.forEach((task: Task) => task.isMenuOpened = false);
+storedTasks.forEach((task: Task) => task.isPinned = false);
 const initialState: Task[] = [...storedTasks];
 
 const tasksSlice = createSlice({
@@ -25,7 +25,24 @@ const tasksSlice = createSlice({
         },
         editTask: (state, action: PayloadAction<{ index: number; title: string; description: string }>) => {
             const { index, title, description } = action.payload;
-            state[index] = { title, description };
+            state[index] = { title, description, isPinned: state[index].isPinned }; 
+            localStorage.setItem('tasks', JSON.stringify(state));
+        },
+        pinTask: (state, action: PayloadAction<number>) => {
+            const index = action.payload;
+            const pinnedTasks = state.filter(task => task.isPinned);
+            if (pinnedTasks.length < 3) {
+                state[index].isPinned = true;
+                const [pinnedTask] = state.splice(index, 1);
+                state.unshift(pinnedTask); 
+                localStorage.setItem('tasks', JSON.stringify(state));
+            }
+        },
+        unpinTask: (state, action: PayloadAction<number>) => {
+            const index = action.payload;
+            state[index].isPinned = false;
+            const [unPinnedTask] = state.splice(index, 1);
+            state.push(unPinnedTask); 
             localStorage.setItem('tasks', JSON.stringify(state));
         },
         loadTasks: (state) => {
@@ -41,5 +58,5 @@ const tasksSlice = createSlice({
     },
 });
 
-export const { addTask, deleteTask, editTask, loadTasks, moveTask } = tasksSlice.actions;
+export const { addTask, deleteTask, editTask, loadTasks, moveTask, pinTask, unpinTask } = tasksSlice.actions;
 export default tasksSlice.reducer;

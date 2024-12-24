@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { moveTask, editTask, deleteTask } from '../store/taskSlice';
+import { moveTask, editTask, deleteTask, pinTask, unpinTask } from '../store/taskSlice';
 import SpecButtons from './SpecButtons';
 import EditModal from './EditModal';
 import ShareModal from './ShareModal';
@@ -15,17 +15,16 @@ import cat4 from '../assets/images/cat4.gif';
 import cat5 from '../assets/images/cat5.gif';
 
 interface Task {
-    index?: number; // Добавьте это поле, если оно необходимо
+    isPinned?: boolean;
     title: string;
     description: string;
 }
 
 interface DraggableTaskListProps {
     tasks: Task[];
-    deleteTask: (index: number) => void;
 }
 
-const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks, deleteTask }) => {
+const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks }) => {
     const dispatch = useDispatch();
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [activeTaskIndex, setActiveTaskIndex] = useState<number | null>(null);
@@ -34,7 +33,7 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks, deleteTask
     const [isInfoModalOpen, setInfoModalOpen] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false); 
     const [currentGif, setCurrentGif] = useState<string | null>(null);
-    const [currentTask, setCurrentTask] = useState<{ index: number | null; title: string; description: string }>({ index: null, title: '', description: '' });
+    const [currentTask, setCurrentTask] = useState<Task | null>(null);
 
     const gifs = [cat1, cat2, cat3, cat4, cat5];
 
@@ -59,7 +58,7 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks, deleteTask
 
     const handleEditTask = (index: number) => {
         const task = tasks[index];
-        setCurrentTask({ index, title: task.title, description: task.description });
+        setCurrentTask({ title: task.title, description: task.description });
         setEditModalOpen(true);
     };
 
@@ -77,18 +76,30 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks, deleteTask
 
     const handleSaveEdit = (newTitle: string, newDesc: string) => {
         if (newTitle.trim() === '') return;
-        dispatch(editTask({ index: currentTask.index!, title: newTitle, description: newDesc }));
-        setEditModalOpen(false);
+        if (currentTask) {
+            dispatch(editTask({ index: tasks.indexOf(currentTask), title: newTitle, description: newDesc }));
+            setEditModalOpen(false);
+        }
     };
 
     const openDeleteModal = (index: number) => {
-        setCurrentTask({ index, title: tasks[index].title, description: tasks[index].description });
+        setCurrentTask({ title: tasks[index].title, description: tasks[index].description });
         setDeleteModalOpen(true);
     };
 
     const handleDeleteTask = () => {
-        dispatch(deleteTask(currentTask.index!));
-        setDeleteModalOpen(false);
+        if (currentTask) {
+            dispatch(deleteTask(tasks.indexOf(currentTask))); 
+            setDeleteModalOpen(false);
+        }
+    };
+
+    const handlePinTask = (index: number) => {
+        if (tasks[index].isPinned) {
+            dispatch(unpinTask(index));
+        } else {
+            dispatch(pinTask(index));
+        }
     };
 
     const truncateText = (text: string) => {
@@ -102,7 +113,7 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks, deleteTask
                 <div
                     className="task"
                     key={index}
-                    draggable
+                    draggable={!task.isPinned} 
                     onDragStart={() => handleDragStart(index)}
                     onDragOver={() => handleDragOver(index)}
                     onDragEnd={handleDragEnd}
@@ -119,6 +130,8 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks, deleteTask
                             onEdit={() => handleEditTask(index)} 
                             onShare={() => handleShareTask(index)} 
                             onInfo={handleInfoTask}
+                            onPin={() => handlePinTask(index)} 
+                            isPinned={task.isPinned || false} // Передаем состояние задачи
                         />
                     )}
                 </div>
@@ -127,14 +140,14 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks, deleteTask
                 isOpen={isEditModalOpen} 
                 onClose={() => setEditModalOpen(false)} 
                 onSave={handleSaveEdit} 
-                fullTitle={currentTask.title} 
-                fullDesc={currentTask.description} 
+                fullTitle={currentTask?.title || ''} 
+                fullDesc={currentTask?.description || ''} 
             />
             <ShareModal 
                 isOpen={isShareModalOpen} 
                 onClose={() => setShareModalOpen(false)} 
-                fullTitle={currentTask.title} 
-                fullDescription={currentTask.description} 
+                fullTitle={currentTask?.title || ''} 
+                fullDescription={currentTask?.description || ''} 
             />
             <InfoModal 
                 isOpen={isInfoModalOpen} 
@@ -146,7 +159,7 @@ const DraggableTaskList: React.FC<DraggableTaskListProps> = ({ tasks, deleteTask
                 onClose={() => setDeleteModalOpen(false)} 
                 onDelete={handleDeleteTask} 
             />
-     </>
+        </>
     );
 };
 
